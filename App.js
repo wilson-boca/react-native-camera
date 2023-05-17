@@ -44,7 +44,10 @@ function App() {
 
   async function capturePhoto() {
     if (camera.current !== null) {
-      const photo = await camera.current.takePhoto({});
+      const photo = await camera.current.takeSnapshot({
+        quality: 30,
+        skipMetadata: true,
+      });
       setImageSource(photo.path);
       setShowCamera(false);
       savePhoto(photo.path);
@@ -52,10 +55,14 @@ function App() {
     }
   }
   async function savePhoto(data) {
-    const filename = 'test.jpeg';
-    const path = `${RNFS.PicturesDirectoryPath}/${filename}`;
-    await RNFS.moveFile(data, path);
-    console.log('PATH', path);
+    const filename = 'test';
+    const path = `${RNFS.PicturesDirectoryPath}/${filename}.jpg`;
+    const pathBase64 = `${RNFS.PicturesDirectoryPath}/${filename}-base64.txt`;
+    await RNFS.copyFile(data, path);
+    RNFS.readFile(path, 'base64').then(base64 => {
+      RNFS.writeFile(pathBase64, base64);
+      console.log(base64);
+    });
   }
 
   if (device == null) {
